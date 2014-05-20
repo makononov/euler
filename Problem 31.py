@@ -1,33 +1,28 @@
 import time
+start = time.clock()
 
-cache = {0: []}
+target = 200
+coins = [1, 2, 5, 10, 20, 50, 100, 200]
+ways = {0: []}
 
-def count_ways(value, forms):
-  try:
-    return cache[value]
-  except KeyError:
-    cache[value] = []
-    for f in forms:
-      if f == value:
-        cache[value].append([f])
+def calculate_ways(target):
+	if target < min(coins):
+		raise Exception("Impossible sum")
 
-      elif f < value:
-        form_ways = count_ways(value - f, forms)
-        if form_ways != None:
-          for i in form_ways:
-            i.append(f)
-            i.sort()
-            if i not in cache[value]:
-              cache[value].append(i)
-
-    if len(cache[value]) == 0 and value > 0:
-      return None 
-
-    return cache[value] 
-
-val = 200
-forms = [1, 2, 5, 10, 20, 50, 100, 200]
-t1 = time.time()
-ways = count_ways(val, forms)
-print ways
-print "Found {0} ways in {1}s.".format(len(ways), time.time() - t1)
+	try: 
+		return ways[target]
+	except KeyError:
+		ways[target] = []
+		candidates = [x for x in sorted(coins, reverse=True) if x <= target]
+		for coin in candidates:
+			if coin == target and [coin] not in ways[target]:
+				ways[target].append([coin])
+			else:
+				for subway in calculate_ways(target - coin):
+					if sorted([coin] + subway) not in ways[target]:
+						ways[target].append(sorted([coin] + subway))
+		# print("Found {0} ways for {1}".format(len(ways[target]), target))
+		return ways[target]
+		
+numways = len(calculate_ways(target))
+print("Found {0} ways in {1} seconds.".format(numways, (time.clock() - start) / 1000))
